@@ -1,7 +1,7 @@
 name: Build Android APK
 
 on:
-  workflow_dispatch: # This allows you to trigger the build manually from the GitHub interface
+  workflow_dispatch:
 
 jobs:
   build:
@@ -28,14 +28,13 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Remove Corrupt Wrapper
+        run: rm -f android/gradle/wrapper/gradle-wrapper.jar
+
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.7'
-          validate-wrappers: false
-
-      - name: Make Gradle executable
-        run: chmod +x ./android/gradlew
 
       - name: Compile APK
         working-directory: ./android
