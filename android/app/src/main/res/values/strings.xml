@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Chronos Booth</string>
+    <string name="title_activity_main">Chronos Booth</string>
+    <string name="package_name">com.chronosbooth.app</string>
+    <string name="custom_url_scheme">com.chronosbooth.app</string>
+</resources>
