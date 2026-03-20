@@ -20,15 +20,35 @@ export default function App() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
+  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
+
   const startCamera = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+      // Stop existing stream if any
+      if (videoRef.current?.srcObject) {
+        const stream = videoRef.current.srcObject as MediaStream;
+        stream.getTracks().forEach(track => track.stop());
+      }
+
+      const constraints = { 
+        video: { 
+          facingMode,
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        } 
+      };
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
       }
     } catch (err) {
-      setError("Could not access camera. Please ensure permissions are granted.");
+      console.error("Camera access error:", err);
+      setError("Could not access camera. Please ensure permissions are granted and you are using a secure connection (HTTPS).");
     }
+  };
+
+  const toggleCamera = () => {
+    setFacingMode(prev => prev === 'user' ? 'environment' : 'user');
   };
 
   const capturePhoto = () => {
@@ -63,8 +83,9 @@ export default function App() {
         origin: { y: 0.6 },
         colors: ['#F27D26', '#FFFFFF', '#000000']
       });
-    } catch (err) {
-      setError("Time travel failed! The temporal rift is unstable. Please try again.");
+    } catch (err: any) {
+      const errorMessage = err.message || "Time travel failed! The temporal rift is unstable. Please try again.";
+      setError(errorMessage);
       setStep('select');
     }
   };
@@ -110,7 +131,7 @@ export default function App() {
     if (step === 'capture') {
       startCamera();
     }
-  }, [step]);
+  }, [step, facingMode]);
 
   return (
     <div className="min-h-screen bg-[#050505] text-white font-sans selection:bg-[#F27D26] selection:text-black">
@@ -149,6 +170,15 @@ export default function App() {
                   className="w-full h-full object-cover mirror"
                 />
                 <div className="absolute inset-0 border-[20px] border-black/20 pointer-events-none" />
+                <div className="absolute top-4 right-4 flex gap-2">
+                  <button 
+                    onClick={toggleCamera}
+                    className="p-2 bg-black/50 backdrop-blur-md rounded-full border border-white/10 hover:bg-white/20 transition-colors"
+                    title="Switch Camera"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                  </button>
+                </div>
                 <div className="absolute top-4 left-4 flex items-center gap-2 px-3 py-1 bg-black/50 backdrop-blur-md rounded-full border border-white/10">
                   <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
                   <span className="text-[10px] font-bold uppercase tracking-widest">Live Feed</span>

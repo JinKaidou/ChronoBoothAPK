@@ -1,10 +1,10 @@
 import { GoogleGenAI, Modality } from "@google/genai";
 
-const apiKey = process.env.GEMINI_API_KEY;
+const apiKey = process.env.GEMINI_API_KEY || (import.meta as any).env?.VITE_GEMINI_API_KEY || "";
 
 export const getAI = () => {
   if (!apiKey) {
-    throw new Error("GEMINI_API_KEY is not set");
+    throw new Error("AI service is not configured, please check your environment setup (GEMINI_API_KEY is missing)");
   }
   return new GoogleGenAI({ apiKey });
 };
