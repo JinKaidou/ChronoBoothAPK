@@ -19,6 +19,7 @@ jobs:
 
       - name: Install dependencies and build web app
         run: |
+          echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" > .env
           npm install
           npm run build
           npx cap sync android
@@ -46,3 +47,5 @@ jobs:
         with:
           name: app-debug
           path: android/app/build/outputs/apk/debug/app-debug.apk
+
+      
