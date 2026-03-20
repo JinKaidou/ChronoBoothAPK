@@ -6,3 +6,14 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Android
+android/app/build/
+android/build/
+android/local.properties
+android/.gradle/
+android/captures/
+android/*.iml
+android/.idea/
+android/.cxx/
+android/app/src/main/assets/public/

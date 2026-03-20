@@ -22,12 +22,16 @@ export default function App() {
 
   const startCamera = async () => {
     try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error("Your browser does not support camera access.");
+      }
       const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
       }
-    } catch (err) {
-      setError("Could not access camera. Please ensure permissions are granted.");
+    } catch (err: any) {
+      console.error("Camera access error:", err);
+      setError(`Could not access camera: ${err.message || "Please ensure permissions are granted and you are using a secure connection (HTTPS)."}`);
     }
   };
 
@@ -85,7 +89,7 @@ export default function App() {
       });
     } catch (err: any) {
       console.error("Time travel error:", err);
-      setError(`Time travel failed: ${err.message || "The temporal rift is unstable."}`);
+      setError(`Time travel failed: ${err.message || "The temporal connection is unstable."}`);
       setStep('select');
     }
   };
