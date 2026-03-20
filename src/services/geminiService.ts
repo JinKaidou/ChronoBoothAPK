@@ -1,10 +1,11 @@
 import { GoogleGenAI, Modality } from "@google/genai";
 
-const apiKey = process.env.GEMINI_API_KEY || (import.meta as any).env?.VITE_GEMINI_API_KEY || "";
+const apiKey = process.env.GEMINI_API_KEY || 
+  (import.meta as any).env?.VITE_GEMINI_API_KEY || "";
 
 export const getAI = () => {
   if (!apiKey) {
-    throw new Error("AI service is not configured, please check your environment setup (GEMINI_API_KEY is missing)");
+    throw new Error("AI service is not configured");
   }
   return new GoogleGenAI({ apiKey });
 };
@@ -12,7 +13,10 @@ export const getAI = () => {
 export async function generateTimeTravelImage(userImageBase64: string, sceneDescription: string) {
   const ai = getAI();
   const response = await ai.models.generateContent({
-    model: 'gemini-2.0-flash',
+    model: 'gemini-2.0-flash-exp-image-generation',
+    config: {
+      responseModalities: [Modality.IMAGE]
+    },
     contents: {
       parts: [
         {
@@ -27,7 +31,6 @@ export async function generateTimeTravelImage(userImageBase64: string, sceneDesc
       ],
     },
   });
-
   for (const part of response.candidates[0].content.parts) {
     if (part.inlineData) {
       return `data:image/png;base64,${part.inlineData.data}`;
@@ -39,7 +42,10 @@ export async function generateTimeTravelImage(userImageBase64: string, sceneDesc
 export async function editImageWithPrompt(imageBase64: string, prompt: string) {
   const ai = getAI();
   const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash-image',
+    model: 'gemini-2.0-flash-exp-image-generation',
+    config: {
+      responseModalities: [Modality.IMAGE]
+    },
     contents: {
       parts: [
         {
@@ -54,7 +60,6 @@ export async function editImageWithPrompt(imageBase64: string, prompt: string) {
       ],
     },
   });
-
   for (const part of response.candidates[0].content.parts) {
     if (part.inlineData) {
       return `data:image/png;base64,${part.inlineData.data}`;
@@ -66,7 +71,7 @@ export async function editImageWithPrompt(imageBase64: string, prompt: string) {
 export async function analyzeHistoricalScene(imageBase64: string) {
   const ai = getAI();
   const response = await ai.models.generateContent({
-    model: 'gemini-3.1-pro-preview',
+    model: 'gemini-2.0-flash',
     contents: {
       parts: [
         {
@@ -81,6 +86,5 @@ export async function analyzeHistoricalScene(imageBase64: string) {
       ],
     },
   });
-
   return response.text;
 }
