@@ -2,38 +2,51 @@ import { GoogleGenAI, Modality } from "@google/genai";
 
 const apiKey = process.env.GEMINI_API_KEY;
 
+if (!apiKey) {
+  console.warn("GEMINI_API_KEY is not set in the environment. AI features will fail.");
+}
+
 export const getAI = () => {
   if (!apiKey) {
-    throw new Error("GEMINI_API_KEY is not set");
+    throw new Error("GEMINI_API_KEY is not set. Please ensure it's provided in your environment variables.");
   }
   return new GoogleGenAI({ apiKey });
 };
 
 export async function generateTimeTravelImage(userImageBase64: string, sceneDescription: string) {
-  const ai = getAI();
-  const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash-image',
-    contents: {
-      parts: [
-        {
-          inlineData: {
-            data: userImageBase64.split(',')[1],
-            mimeType: 'image/png',
+  try {
+    const ai = getAI();
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash-image',
+      contents: {
+        parts: [
+          {
+            inlineData: {
+              data: userImageBase64.split(',')[1],
+              mimeType: 'image/jpeg',
+            },
           },
-        },
-        {
-          text: `This is a photo of a person. Please create a high-quality historical scene of ${sceneDescription} and seamlessly integrate this person's face and likeness into the scene as a central character. The style should match the historical period. Output only the resulting image.`,
-        },
-      ],
-    },
-  });
+          {
+            text: `This is a photo of a person. Please create a high-quality historical scene of ${sceneDescription} and seamlessly integrate this person's face and likeness into the scene as a central character. The style should match the historical period. Output only the resulting image.`,
+          },
+        ],
+      },
+    });
 
-  for (const part of response.candidates[0].content.parts) {
-    if (part.inlineData) {
-      return `data:image/png;base64,${part.inlineData.data}`;
+    if (!response.candidates?.[0]?.content?.parts) {
+      throw new Error("Invalid response from Gemini API");
     }
+
+    for (const part of response.candidates[0].content.parts) {
+      if (part.inlineData) {
+        return `data:image/jpeg;base64,${part.inlineData.data}`;
+      }
+    }
+    throw new Error("No image generated in the response");
+  } catch (error: any) {
+    console.error("Gemini API Error:", error);
+    throw error;
   }
-  throw new Error("No image generated");
 }
 
 export async function editImageWithPrompt(imageBase64: string, prompt: string) {

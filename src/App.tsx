@@ -35,15 +35,35 @@ export default function App() {
     if (videoRef.current && canvasRef.current) {
       const context = canvasRef.current.getContext('2d');
       if (context) {
-        canvasRef.current.width = videoRef.current.videoWidth;
-        canvasRef.current.height = videoRef.current.videoHeight;
-        context.drawImage(videoRef.current, 0, 0);
-        const dataUrl = canvasRef.current.toDataURL('image/png');
+        const video = videoRef.current;
+        const canvas = canvasRef.current;
+        
+        // Downscale image to max 1024px to avoid payload issues
+        const MAX_DIM = 1024;
+        let width = video.videoWidth;
+        let height = video.videoHeight;
+        
+        if (width > height) {
+          if (width > MAX_DIM) {
+            height *= MAX_DIM / width;
+            width = MAX_DIM;
+          }
+        } else {
+          if (height > MAX_DIM) {
+            width *= MAX_DIM / height;
+            height = MAX_DIM;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        context.drawImage(video, 0, 0, width, height);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.8); // Use JPEG with compression
         setUserImage(dataUrl);
         setStep('select');
         
         // Stop camera stream
-        const stream = videoRef.current.srcObject as MediaStream;
+        const stream = video.srcObject as MediaStream;
         stream?.getTracks().forEach(track => track.stop());
       }
     }
@@ -63,8 +83,9 @@ export default function App() {
         origin: { y: 0.6 },
         colors: ['#F27D26', '#FFFFFF', '#000000']
       });
-    } catch (err) {
-      setError("Time travel failed! The temporal rift is unstable. Please try again.");
+    } catch (err: any) {
+      console.error("Time travel error:", err);
+      setError(`Time travel failed: ${err.message || "The temporal rift is unstable."}`);
       setStep('select');
     }
   };
