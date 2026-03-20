@@ -1,19 +1,16 @@
 import { GoogleGenAI, Modality } from "@google/genai";
-
 const apiKey = process.env.GEMINI_API_KEY || 
   (import.meta as any).env?.VITE_GEMINI_API_KEY || "";
-
 export const getAI = () => {
   if (!apiKey) {
     throw new Error("AI service is not configured");
   }
   return new GoogleGenAI({ apiKey });
 };
-
 export async function generateTimeTravelImage(userImageBase64: string, sceneDescription: string) {
   const ai = getAI();
   const response = await ai.models.generateContent({
-    model: 'gemini-2.0-flash-exp-image-generation',
+    model: 'gemini-2.5-flash-image',
     config: {
       responseModalities: [Modality.IMAGE]
     },
@@ -38,11 +35,10 @@ export async function generateTimeTravelImage(userImageBase64: string, sceneDesc
   }
   throw new Error("No image generated");
 }
-
 export async function editImageWithPrompt(imageBase64: string, prompt: string) {
   const ai = getAI();
   const response = await ai.models.generateContent({
-    model: 'gemini-2.0-flash-exp-image-generation',
+    model: 'gemini-2.5-flash-image',
     config: {
       responseModalities: [Modality.IMAGE]
     },
@@ -67,7 +63,6 @@ export async function editImageWithPrompt(imageBase64: string, prompt: string) {
   }
   throw new Error("No image generated");
 }
-
 export async function analyzeHistoricalScene(imageBase64: string) {
   const ai = getAI();
   const response = await ai.models.generateContent({
