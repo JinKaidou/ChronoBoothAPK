@@ -12,7 +12,7 @@ export const getAI = () => {
 export async function generateTimeTravelImage(userImageBase64: string, sceneDescription: string) {
   const ai = getAI();
   const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash-image',
+    model: 'gemini-2.0-flash',
     contents: {
       parts: [
         {
